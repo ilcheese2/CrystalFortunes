@@ -79,6 +79,6 @@ public record EvilBeastPrediction(UUID player, UUID entity, UUID foxEntity) impl
 
     @Override
     public PredictionType<?> getType() {
-        return PredictionType.LOVE;
+        return PredictionType.EVIL_BEAST;
     }
 }

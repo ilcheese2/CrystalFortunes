@@ -26,9 +26,6 @@ import java.util.*;
 
 public interface Prediction {
 
-
-
-
     PredictionType<?> getType();
 
     String toString();
@@ -55,7 +52,7 @@ public interface Prediction {
                 break;
             }
         }
-        //player.sendMessage(Text.of("Cheese").getWithStyle(Style));
+
         ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));
         return prediction;
     }

@@ -42,7 +42,7 @@ public class PredictionData extends PersistentState {
 
     public static PredictionData getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
-        PredictionData state = persistentStateManager.getOrCreate(type, CrystalFortunes.MODID+ ":predictions");
+        PredictionData state = persistentStateManager.getOrCreate(type, CrystalFortunes.MODID+ "_predictions");
         if (created) {
             Iterator<Map.Entry<UUID, Prediction>> iterator = state.predictions.entrySet().iterator();
             while (iterator.hasNext()) {
