@@ -1,0 +1,51 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "crystal_fortunes:red",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+      ]
+    },
+    {
+      "name": "box_blur",
+      "intarget": "swap",
+      "outtarget": "minecraft:main",
+      "use_linear_filter": true,
+      "uniforms": [
+        {
+          "name": "BlurDir",
+          "values": [ 1.0, 0.0 ]
+        },
+        {
+          "name": "Radius",
+          "values": [ 14.0 ]
+        }
+      ]
+    },
+    {
+      "name": "box_blur",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "use_linear_filter": true,
+      "uniforms": [
+        {
+          "name": "BlurDir",
+          "values": [ 0.0, 1.0 ]
+        },
+        {
+          "name": "Radius",
+          "values": [ 14.0 ]
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

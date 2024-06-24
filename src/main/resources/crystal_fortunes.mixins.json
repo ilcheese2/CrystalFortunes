@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.ilcheese2.crystal_fortunes.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "FallingBlockEntityAccessor",
+    "LivingEntityMixin",
+    "ServerPlayerEntityMixin",
+    "SpawnHelperInvoker",
+    "StatTypeAccessor",
+    "StatusEffectInstanceAccessor",
+    "WorldInvoker"
+  ],
+  "client": [
+    "ClientPlayerEntityMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "EntityRendererInvoker",
+    "EntityRenderersAccessor",
+    "GameRendererMixin",
+    "InGameHudMixin",
+    "LanguageManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

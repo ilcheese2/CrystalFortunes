@@ -1,0 +1,30 @@
+{
+  "parent": "crystal_fortunes:predictions/root",
+  "criteria": {
+    "kill_sin": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "crystal_fortunes:sin"
+        }
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.crystal_fortunes.predictions.sins.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:bone"
+    },
+    "title": {
+      "translate": "advancements.crystal_fortunes.predictions.sins.title"
+    }
+  },
+  "requirements": [
+    [
+      "kill_sin"
+    ]
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "crystal_fortunes:predictions/root",
+  "criteria": {
+    "gain_ring": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "crystal_fortunes:ring"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.crystal_fortunes.predictions.true_love.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "crystal_fortunes:ring"
+    },
+    "title": {
+      "translate": "advancements.crystal_fortunes.predictions.true_love.title"
+    }
+  },
+  "requirements": [
+    [
+      "gain_ring"
+    ]
+  ]
+}

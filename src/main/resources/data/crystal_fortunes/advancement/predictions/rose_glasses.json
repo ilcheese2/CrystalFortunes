@@ -1,0 +1,34 @@
+{
+  "parent": "crystal_fortunes:predictions/root",
+  "criteria": {
+    "die_with_ring": {
+      "trigger": "minecraft:entity_killed_player",
+      "conditions": {
+        "player": {
+          "equipment": {
+            "head": {
+              "item": "crystal_fortunes:ring"
+            }
+          }
+        }
+      }
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.crystal_fortunes.predictions.rose_glasses.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "crystal_fortunes:rose_glasses"
+    },
+    "title": {
+      "translate": "advancements.crystal_fortunes.predictions.rose_glasses.title"
+    }
+  },
+  "requirements": [
+    [
+      "die_with_ring"
+    ]
+  ]
+}

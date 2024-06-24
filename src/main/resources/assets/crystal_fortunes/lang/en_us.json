@@ -1,0 +1,22 @@
+{
+  "item.crystal_fortunes.ring": "Ring",
+  "item.crystal_fortunes.rose_glasses": "Rose Glasses",
+  "item.crystal_fortunes.holy_grenade": "Holy Grenade",
+  "block.crystal_fortunes.crystal_ball": "Crystal Ball",
+  "entity.crystal_fortunes.sin": "Sin",
+  "entity.crystal_fortunes.falling_gold": "Falling Gold Block",
+  "entity.crystal_fortunes.fairy": "Fairy",
+  "prediction.crystal_fortunes.love.receive.1": "The spirits have found you a partner, {name}. Give them a suitable gift",
+  "prediction.crystal_fortunes.love.receive.2": "Love is in the air. Direct your attentions to {name}",
+  "prediction.crystal_fortunes.beast.receive.1": "The spirits call upon you to cleanse the forest",
+  "prediction.crystal_fortunes.beast.receive.2": "Defeat the beast terrorizing the forest",
+  "prediction.crystal_fortunes.sin.receive.1":  "Your sins have come to haunt you",
+  "prediction.crystal_fortunes.sin.receive.2":  "The past shall be unearthed",
+  "prediction.crystal_fortunes.sin.receive.3":  "Face the wrath of your sins",
+  "prediction.crystal_fortunes.sin.while.1":  "These are your sins not mine",
+  "prediction.crystal_fortunes.sin.while.2":  "I cannot help you",
+  "prediction.crystal_fortunes.never_hungry.receive.1":  "The spirits shall feed you",
+  "prediction.crystal_fortunes.never_hungry.receive.2":  "Your days of hunger will end",
+  "prediction.crystal_fortunes.never_hungry.receive.3":  "The forest grants you its bounty",
+  "prediction.crystal_fortunes.windfall.receive.1":  "A windfall is right on your doorstep"
+}

@@ -1,0 +1,39 @@
+{
+  "criteria": {
+    "ball_used": {
+      "trigger": "minecraft:any_block_use",
+      "conditions": {
+        "location": [
+          {
+            "condition": "minecraft:location_check",
+            "predicate": {
+              "block": {
+                "blocks": "crystal_fortunes:crystal_ball"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+    "description": {
+      "translate": "advancements.crystal_fortunes.predictions.root.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "crystal_fortunes:crystal_ball"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancements.crystal_fortunes.predictions.title"
+    }
+  },
+  "requirements": [
+    [
+        "ball_used"
+    ]
+  ]
+}

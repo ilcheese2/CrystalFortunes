@@ -1,0 +1,19 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "crystal_fortunes:love",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "crystal_fortunes",
+  "version": "${version}",
+  "name": "Crystal Fortunes",
+  "description": "",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/cheese/Crystal Fortunes"
+  },
+  "license": "MIT",
+  "icon": "assets/crystal_fortunes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient"
+    ],
+    "main": [
+      "io.github.ilcheese2.crystal_fortunes.CrystalFortunes"
+    ]
+  },
+  "mixins": [
+    "crystal_fortunes.mixins.json"
+  ],
+  "accessWidener": "crystal_fortunes.accesswidener",
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "1.21-beta.3"
+  }
+}

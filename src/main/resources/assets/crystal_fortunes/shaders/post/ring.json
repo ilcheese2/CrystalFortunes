@@ -1,0 +1,31 @@
+{
+  "targets": [
+    "swap",
+    "previous"
+  ],
+  "passes": [
+    {
+      "name": "crystal_fortunes:mblur",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+      ],
+      "auxtargets": [
+        {
+          "name": "PrevSampler",
+          "id": "previous"
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "previous"
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

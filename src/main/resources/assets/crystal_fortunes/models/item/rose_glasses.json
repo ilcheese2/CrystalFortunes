@@ -1,0 +1,15 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "crystal_fortunes:item/rose_glasses"
+  },
+  "display": {
+    "head": {
+      "translation": [
+        0,
+        -0.25,
+          -8
+      ]
+    }
+  }
+}
