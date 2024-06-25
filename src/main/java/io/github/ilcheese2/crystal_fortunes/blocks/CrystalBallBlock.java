@@ -1,33 +1,24 @@
 package io.github.ilcheese2.crystal_fortunes.blocks;
 
 import com.mojang.serialization.MapCodec;
-import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import io.github.ilcheese2.crystal_fortunes.camera.ServerCameraHandler;
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
 import io.github.ilcheese2.crystal_fortunes.predictions.*;
-import net.fabricmc.fabric.api.client.rendering.v1.DimensionRenderingRegistry;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.particle.CampfireSmokeParticle;
-import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -68,7 +59,7 @@ public class CrystalBallBlock extends BlockWithEntity {
                 CrystalFortunesClient.dialogueRenderer.addText(lines.get(world.random.nextInt(lines.size())));
             }
 
-            return ActionResult.CONSUME;
+            return ActionResult.SUCCESS;
         }
 
         Prediction prediction = getPlayerPrediction(player, (CrystalBallBlockEntity) world.getBlockEntity(pos));
@@ -76,11 +67,14 @@ public class CrystalBallBlock extends BlockWithEntity {
         if (prediction instanceof EvilBeastPrediction beastPrediction) {
             ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, ((WorldInvoker) world).invokeGetEntityLookup().get(beastPrediction.entity()));
         } else if (prediction instanceof LovePrediction lovePrediction) {
-            ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, ((WorldInvoker) world).invokeGetEntityLookup().get(lovePrediction.player()));
+            ServerPlayerEntity entity = (ServerPlayerEntity) ((WorldInvoker) world).invokeGetEntityLookup().get(lovePrediction.player());
+            if (entity != null && entity.getCameraEntity() == entity) {
+                ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, entity);
+            }
         }
 
-        CrystalFortunes.LOGGER.info(getPlayerPrediction(player, (CrystalBallBlockEntity) world.getBlockEntity(pos)).toString());
-        return ActionResult.CONSUME;
+        //CrystalFortunes.LOGGER.info(getPlayerPrediction(player, (CrystalBallBlockEntity) world.getBlockEntity(pos)).toString());
+        return ActionResult.SUCCESS;
     }
 
     @Override

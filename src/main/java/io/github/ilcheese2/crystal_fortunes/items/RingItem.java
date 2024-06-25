@@ -2,23 +2,18 @@ package io.github.ilcheese2.crystal_fortunes.items;
 
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
 import io.github.ilcheese2.crystal_fortunes.mixin.StatusEffectInstanceAccessor;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.block.WitherRoseBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import org.ladysnake.satin.api.managed.ManagedShaderEffect;
 
 public class RingItem extends Item {
-
-    @Environment(EnvType.CLIENT)
 
     public RingItem(Settings settings) {
         super(settings);

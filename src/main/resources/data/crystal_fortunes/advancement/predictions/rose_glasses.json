@@ -1,13 +1,13 @@
 {
   "parent": "crystal_fortunes:predictions/root",
   "criteria": {
-    "die_with_ring": {
+    "die_with_glasses": {
       "trigger": "minecraft:entity_killed_player",
       "conditions": {
         "player": {
           "equipment": {
             "head": {
-              "item": "crystal_fortunes:ring"
+              "items": "crystal_fortunes:rose_glasses"
             }
           }
         }
@@ -28,7 +28,7 @@
   },
   "requirements": [
     [
-      "die_with_ring"
+      "die_with_glasses"
     ]
   ]
 }

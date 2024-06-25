@@ -5,19 +5,21 @@ import io.github.ilcheese2.crystal_fortunes.client.particle.MagicParticle;
 import io.github.ilcheese2.crystal_fortunes.client.renderers.*;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
-import io.github.ilcheese2.crystal_fortunes.predictions.*;
+import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.NullPrediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.Prediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.PredictionType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.block.EndRodBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -30,7 +32,7 @@ import java.util.*;
 
 public class CrystalFortunesClient implements ClientModInitializer {
 
-    public static Prediction prediction; // where to put
+    public static Prediction prediction = new NullPrediction(); // where to put
     public static final ManagedShaderEffect RING_SHADER = ShaderEffectManager.getInstance()
             .manage(Identifier.of(CrystalFortunes.MODID, "shaders/post/ring.json"));
     public static final ManagedShaderEffect LOVE_SHADER = ShaderEffectManager.getInstance()
@@ -45,7 +47,7 @@ public class CrystalFortunesClient implements ClientModInitializer {
     public static final EntityModelLayer FAIRY_MODEL_LAYER = new EntityModelLayer(Identifier.of(CrystalFortunes.MODID, "fairy"), "main");
 
     // typeofprediction -> event -> lines
-    public static final Map<Identifier, Map<String, List<Text>>> translationsLookup = new HashMap<Identifier, Map<String, List<Text>>>();
+    public static final Map<Identifier, Map<String, List<Text>>> translationsLookup = new HashMap<>();
 
     private static List<ManagedShaderEffect> shaderRequests = new ArrayList<>();
     public static DialogueRenderer dialogueRenderer;
@@ -74,7 +76,7 @@ public class CrystalFortunesClient implements ClientModInitializer {
                 name = ((WorldInvoker) context.client().world).invokeGetEntityLookup().get(love.lover()).getName();
             }
             if (prediction instanceof NullPrediction) {
-                releaseShader(LOVE_SHADER);
+                releaseShader(LOVE_SHADER, true);
                 return;
             } //shrug
 
@@ -94,14 +96,16 @@ public class CrystalFortunesClient implements ClientModInitializer {
 
         HeartRenderer.initialize();
 
-        HudRenderCallback.EVENT.register(((drawContext, tickCounter) -> {
-            dialogueRenderer.render(drawContext);
-        }));
+        HudRenderCallback.EVENT.register(((drawContext, tickCounter) -> dialogueRenderer.render(drawContext)));
         ShaderEffectRenderCallback.EVENT.register((tickDelta) -> {
             if (!shaderRequests.isEmpty()) {
                 shaderRequests.getFirst().render(tickDelta);
             }
         });
+        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+            prediction = new NullPrediction();
+            shaderRequests.clear();
+        }));
     }
 
     public static void requestShader(ManagedShaderEffect shader) {
@@ -110,6 +114,15 @@ public class CrystalFortunesClient implements ClientModInitializer {
 
     public static void releaseShader(ManagedShaderEffect shader) {
         shaderRequests.remove(shader);
+    }
+
+    public static void releaseShader(ManagedShaderEffect shader, boolean all) {
+        if (all) {
+            shaderRequests.removeAll(Collections.singleton(shader));
+        }
+        else {
+            releaseShader(shader);
+        }
     }
 
     public static void buildTranslations() {
