@@ -81,6 +81,7 @@ public class CameraData extends PersistentState {
         }
         serverState.playerStates.get(player.getUuid()).updatePlayer(player);
         serverState.playerStates.remove(player.getUuid());
+        serverState.markDirty();
     }
 
     public static CameraData createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {

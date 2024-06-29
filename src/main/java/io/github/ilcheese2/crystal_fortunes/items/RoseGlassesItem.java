@@ -1,6 +1,5 @@
 package io.github.ilcheese2.crystal_fortunes.items;
 
-import net.minecraft.block.WearableCarvedPumpkinBlock;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Equipment;

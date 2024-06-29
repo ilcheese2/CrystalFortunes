@@ -78,7 +78,7 @@ public class PredictionData extends PersistentState {
 
     public static PredictionData createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         PredictionData data = new PredictionData();
-        data.predictions = Maps.newHashMap(predictionsCodec.parse(NbtOps.INSTANCE, tag).result().get()); // ineffiecent or something idk
+        data.predictions = Maps.newHashMap(predictionsCodec.parse(NbtOps.INSTANCE, tag).result().orElse((new HashMap<>()))); // ineffiecent or something idk
         created = true;
         return data;
     }

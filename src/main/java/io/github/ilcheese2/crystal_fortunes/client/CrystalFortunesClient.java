@@ -3,12 +3,11 @@ package io.github.ilcheese2.crystal_fortunes.client;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.client.particle.MagicParticle;
 import io.github.ilcheese2.crystal_fortunes.client.renderers.*;
+import io.github.ilcheese2.crystal_fortunes.client.renderers.WheelRenderer;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
-import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.NullPrediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.Prediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.PredictionType;
+import io.github.ilcheese2.crystal_fortunes.networking.UpdateWheelPayload;
+import io.github.ilcheese2.crystal_fortunes.predictions.*;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -20,6 +19,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -63,6 +63,8 @@ public class CrystalFortunesClient implements ClientModInitializer {
         EntityRendererRegistry.register(CrystalFortunes.FAIRY_ENTITY, FairyEntityRenderer::new);
         EntityRendererRegistry.register(CrystalFortunes.HOLY_GRENADE_ENTITY, HolyGrenadeEntityRenderer::new);
 
+        BlockEntityRendererFactories.register(CrystalFortunes.CRYSTAL_BALL_BLOCK_ENTITY, CrystalBallBlockEntityRenderer::new);
+
         EntityModelLayerRegistry.registerModelLayer(FAIRY_MODEL_LAYER, FairyEntityModel::getTexturedModelData);
         BlockRenderLayerMap.INSTANCE.putBlock(CrystalFortunes.CRYSTAL_BALL, RenderLayer.getCutout());
 
@@ -79,6 +81,9 @@ public class CrystalFortunesClient implements ClientModInitializer {
                 releaseShader(LOVE_SHADER, true);
                 return;
             } //shrug
+            if (CrystalFortunes.WHEEL_OF_WACKY_LOADED) {
+                WheelRenderer.handlePrediction(prediction);
+            }
 
             List<Text> lines = translationsLookup.get(PredictionType.PREDICTION_REGISTRY.getKey(prediction.getType()).get().getValue()).get("receive");
             Text dialogue = lines.get(MinecraftClient.getInstance().world.random.nextInt(lines.size()));
@@ -89,6 +94,15 @@ public class CrystalFortunesClient implements ClientModInitializer {
             dialogueRenderer.addText(dialogue);
         });
 
+        if (CrystalFortunes.WHEEL_OF_WACKY_LOADED) {
+            ClientPlayNetworking.registerGlobalReceiver(UpdateWheelPayload.UPDATE_WHEEL_ID, (payload, context) -> {
+                if (WheelRenderer.wackyWheel != null) {
+                    WheelRenderer.wackyWheel.setPreviousRoll(WheelRenderer.wackyWheel.getRoll());
+                    WheelRenderer.wackyWheel.setRoll(payload.roll().getFirst());
+                }
+            });
+        }
+
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (needLoveEffects()) { HeartRenderer.increaseSize(); }
             dialogueRenderer.tick();
@@ -97,6 +111,10 @@ public class CrystalFortunesClient implements ClientModInitializer {
         HeartRenderer.initialize();
 
         HudRenderCallback.EVENT.register(((drawContext, tickCounter) -> dialogueRenderer.render(drawContext)));
+        if (CrystalFortunes.WHEEL_OF_WACKY_LOADED) {
+            HudRenderCallback.EVENT.register(new WheelRenderer());
+        }
+
         ShaderEffectRenderCallback.EVENT.register((tickDelta) -> {
             if (!shaderRequests.isEmpty()) {
                 shaderRequests.getFirst().render(tickDelta);

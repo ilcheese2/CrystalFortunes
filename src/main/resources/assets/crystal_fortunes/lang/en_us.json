@@ -18,5 +18,7 @@
   "prediction.crystal_fortunes.never_hungry.receive.1":  "The spirits shall feed you",
   "prediction.crystal_fortunes.never_hungry.receive.2":  "Your days of hunger will end",
   "prediction.crystal_fortunes.never_hungry.receive.3":  "The forest grants you its bounty",
-  "prediction.crystal_fortunes.windfall.receive.1":  "A windfall is right on your doorstep"
+  "prediction.crystal_fortunes.windfall.receive.1":  "A windfall is right on your doorstep",
+  "prediction.crystal_fortunes.wheel.receive.1":  "Take a gamble",
+  "prediction.crystal_fortunes.wheel.receive.2":  "Let's see how your fortune fares"
 }

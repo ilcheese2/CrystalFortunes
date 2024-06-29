@@ -20,6 +20,17 @@ repositories {
             includeGroupByRegex 'dev\\.onyxstudios.*'
         }
     }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 
@@ -36,7 +47,7 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "org.ladysnake:satin:${satin_version}"
-    // Include Satin as a Jar-in-Jar dependency (optional)
+    modCompileOnly("maven.modrinth:wheel-of-wacky:${wheel_version}")
 }
 
 processResources {

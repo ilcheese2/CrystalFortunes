@@ -1,13 +1,12 @@
 package io.github.ilcheese2.crystal_fortunes.predictions;
 
-import com.ibm.icu.impl.CacheValue;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
+import io.github.ilcheese2.crystal_fortunes.camera.CameraData;
 import io.github.ilcheese2.crystal_fortunes.camera.ServerCameraHandler;
 import io.github.ilcheese2.crystal_fortunes.mixin.SpawnHelperInvoker;
-import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -15,10 +14,8 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.passive.RabbitEntity;
-import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.command.SpectateCommand;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Uuids;
@@ -27,26 +24,28 @@ import net.minecraft.world.World;
 
 import java.util.UUID;
 
-public record EvilBeastPrediction(UUID player, UUID entity, UUID foxEntity) implements Prediction {
+public record EvilBeastPrediction(UUID player, UUID rabbit, UUID fox) implements Prediction {
 
 
     private final static int SPAWN_DISTANCE = 100;
 
     public static final MapCodec<EvilBeastPrediction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Uuids.CODEC.fieldOf("player").forGetter(EvilBeastPrediction::player),Uuids.CODEC.fieldOf("entity").forGetter(EvilBeastPrediction::entity),Uuids.CODEC.fieldOf("fox").forGetter(EvilBeastPrediction::foxEntity)).apply(instance, EvilBeastPrediction::new));
+            Uuids.CODEC.fieldOf("player").forGetter(EvilBeastPrediction::player),Uuids.CODEC.fieldOf("rabbit").forGetter(EvilBeastPrediction::rabbit),Uuids.CODEC.fieldOf("fox").forGetter(EvilBeastPrediction::fox)).apply(instance, EvilBeastPrediction::new));
 
     @Override
     public String toString() {
-        return "Entity: " + entity;
+        return "Entity: " + rabbit;
     }
 
     @Override
     public void tick(World world) {
-        Entity rabbit = ((ServerWorld) world).getEntity(entity);
-        if (rabbit == null) {
+        Entity rabbit2 = ((ServerWorld) world).getEntity(rabbit);
+        if (rabbit2 == null) {
             PlayerEntity player = ((PlayerEntity) ((ServerWorld) world).getEntity(this.player));
             if (player != null) {
+                ((ServerPlayerEntity) player).setCameraEntity(player);
                 player.giveItemStack(new ItemStack(CrystalFortunes.HOLY_GRENADE, 1));
+                CameraData.fixPlayer((ServerPlayerEntity) player);
             }
             PredictionData.deletePrediction(this.player);
         }

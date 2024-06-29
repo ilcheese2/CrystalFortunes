@@ -13,13 +13,14 @@
   ],
   "client": [
     "ClientPlayerEntityMixin",
-    "LivingEntityMixin",
     "ClientPlayNetworkHandlerMixin",
     "EntityRendererInvoker",
     "EntityRenderersAccessor",
     "GameRendererMixin",
     "InGameHudMixin",
-    "LanguageManagerMixin"
+    "BlockEntityAccessor",
+    "LanguageManagerMixin",
+    "LivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

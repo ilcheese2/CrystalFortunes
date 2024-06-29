@@ -3,26 +3,22 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.gui.screen.ChatInputSuggestor;
-import net.minecraft.client.gui.screen.report.ChatSelectionScreen;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.CheckedRandom;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 
 public interface Prediction {
 
@@ -46,11 +42,8 @@ public interface Prediction {
         Collections.shuffle(list);
         Iterator<Map.Entry<RegistryKey<PredictionType<?>>, PredictionType<?>>> iterator = list.iterator();
         Prediction prediction = null;
-        while (iterator.hasNext()) {
+        while (iterator.hasNext() && prediction == null) {
             prediction = iterator.next().getValue().factory().create(player, blockEntity);
-            if (prediction != null) {
-                break;
-            }
         }
 
         ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));

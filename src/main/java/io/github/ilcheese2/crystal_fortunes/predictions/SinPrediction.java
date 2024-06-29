@@ -1,33 +1,24 @@
 package io.github.ilcheese2.crystal_fortunes.predictions;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
-import io.github.ilcheese2.crystal_fortunes.entities.FallingGoldEntity;
 import io.github.ilcheese2.crystal_fortunes.entities.SinEntity;
 import io.github.ilcheese2.crystal_fortunes.mixin.StatTypeAccessor;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.ServerMetadata;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.ServerStatHandler;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Uuids;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.UUID;
 
 public record SinPrediction(UUID player, UUID sin) implements Prediction {

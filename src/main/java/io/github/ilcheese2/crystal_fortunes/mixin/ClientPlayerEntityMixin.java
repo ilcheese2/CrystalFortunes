@@ -2,13 +2,9 @@ package io.github.ilcheese2.crystal_fortunes.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
-import io.github.ilcheese2.crystal_fortunes.items.RingItem;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Hand;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ClientPlayerEntity.class)

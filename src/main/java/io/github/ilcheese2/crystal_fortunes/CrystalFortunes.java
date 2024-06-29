@@ -12,13 +12,9 @@ import io.github.ilcheese2.crystal_fortunes.items.HolyGrenadeItem;
 import io.github.ilcheese2.crystal_fortunes.items.RingItem;
 import io.github.ilcheese2.crystal_fortunes.items.RoseGlassesItem;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
-import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.NullPrediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.Prediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.PredictionData;
+import io.github.ilcheese2.crystal_fortunes.networking.UpdateWheelPayload;
+import io.github.ilcheese2.crystal_fortunes.predictions.*;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleRenderEvents;
-import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -26,16 +22,12 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
-import net.fabricmc.fabric.impl.networking.RegistrationPayload;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
@@ -81,6 +73,8 @@ public class CrystalFortunes implements ModInitializer {
     public static final Item CRYSTAL_BALL_ITEM = Registry.register(Registries.ITEM, Identifier.of(MODID, "crystal_ball"), new BlockItem(CRYSTAL_BALL, new Item.Settings()));
     public static final SimpleParticleType MAGIC_PARTICLE = Registry.register(Registries.PARTICLE_TYPE, Identifier.of(MODID, "magic_particle"), FabricParticleTypes.simple());
 
+    public static final boolean WHEEL_OF_WACKY_LOADED = FabricLoader.getInstance().isModLoaded("wacky_wheel");
+
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
     @Override
@@ -96,6 +90,10 @@ public class CrystalFortunes implements ModInitializer {
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(content -> content.addAfter(Items.END_CRYSTAL, CRYSTAL_BALL_ITEM));
         PayloadTypeRegistry.playS2C().register(PredictionPayload.PREDICTION_ID, PredictionPayload.CODEC);
+        if (WHEEL_OF_WACKY_LOADED) {
+            PayloadTypeRegistry.playS2C().register(UpdateWheelPayload.UPDATE_WHEEL_ID, UpdateWheelPayload.CODEC);
+            WheelPrediction.register();
+        }
         ServerTickEvents.START_SERVER_TICK.register(server -> {
             Iterator<Map.Entry<UUID, Prediction>> iterator = PredictionData.getServerState(server).predictions.entrySet().iterator();
             while (iterator.hasNext()) {

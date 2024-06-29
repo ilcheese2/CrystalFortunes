@@ -1,8 +1,6 @@
 package io.github.ilcheese2.crystal_fortunes.mixin;
 
-import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
-import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
 import net.minecraft.client.gui.hud.InGameHud;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
