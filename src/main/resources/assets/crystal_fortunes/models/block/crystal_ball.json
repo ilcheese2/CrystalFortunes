@@ -2,7 +2,6 @@
 	"credit": "Made with Blockbench",
 	"textures": {
 		"1": "minecraft:block/glass",
-		"2": "crystal_fortunes:block/downsized_wood",
 		"3": "minecraft:block/oak_log_top",
 		"4": "minecraft:block/oak_log"
 	},
