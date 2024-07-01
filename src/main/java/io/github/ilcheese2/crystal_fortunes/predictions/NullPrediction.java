@@ -3,8 +3,8 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public record NullPrediction() implements Prediction {
@@ -13,7 +13,7 @@ public record NullPrediction() implements Prediction {
 
     @Override
     public String toString() {
-        return "Null";
+        return "null";
     }
 
     @Override
@@ -21,7 +21,7 @@ public record NullPrediction() implements Prediction {
     }
 
 
-    public static NullPrediction create(PlayerEntity playerEntity, CrystalBallBlockEntity blockEntity) {
+    public static NullPrediction create(PlayerEntity playerEntity, BlockPos pos) {
         return null;
     }
 

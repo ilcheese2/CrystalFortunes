@@ -2,11 +2,11 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import io.github.ilcheese2.crystal_fortunes.entities.FallingGoldEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -39,8 +39,8 @@ public record WindfallPrediction(UUID uuid, BlockBox safeArea) implements Predic
     }
 
 
-    WindfallPrediction(PlayerEntity playerEntity, CrystalBallBlockEntity blockEntity) {
-        this(playerEntity.getUuid(), BlockBox.create(blockEntity.getPos().add(-DISTANCE,-DISTANCE,-DISTANCE),blockEntity.getPos().add(DISTANCE,DISTANCE,DISTANCE)));
+    WindfallPrediction(PlayerEntity playerEntity, BlockPos pos) {
+        this(playerEntity.getUuid(), BlockBox.create(pos.add(-DISTANCE,-DISTANCE,-DISTANCE), pos.add(DISTANCE,DISTANCE,DISTANCE)));
     }
 
     @Override

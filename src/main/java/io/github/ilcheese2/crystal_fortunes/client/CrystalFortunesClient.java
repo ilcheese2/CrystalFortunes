@@ -3,13 +3,18 @@ package io.github.ilcheese2.crystal_fortunes.client;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.client.particle.MagicParticle;
 import io.github.ilcheese2.crystal_fortunes.client.renderers.*;
-import io.github.ilcheese2.crystal_fortunes.client.renderers.WheelRenderer;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
+import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
 import io.github.ilcheese2.crystal_fortunes.networking.UpdateWheelPayload;
-import io.github.ilcheese2.crystal_fortunes.predictions.*;
+import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.NullPrediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.Prediction;
+import io.github.ilcheese2.crystal_fortunes.predictions.PredictionType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -19,8 +24,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
@@ -52,6 +57,8 @@ public class CrystalFortunesClient implements ClientModInitializer {
     private static List<ManagedShaderEffect> shaderRequests = new ArrayList<>();
     public static DialogueRenderer dialogueRenderer;
 
+    private boolean shadersEnabled = true;
+
     @Override
     public void onInitializeClient() {
         prediction = null;
@@ -63,8 +70,6 @@ public class CrystalFortunesClient implements ClientModInitializer {
         EntityRendererRegistry.register(CrystalFortunes.FAIRY_ENTITY, FairyEntityRenderer::new);
         EntityRendererRegistry.register(CrystalFortunes.HOLY_GRENADE_ENTITY, HolyGrenadeEntityRenderer::new);
 
-        BlockEntityRendererFactories.register(CrystalFortunes.CRYSTAL_BALL_BLOCK_ENTITY, CrystalBallBlockEntityRenderer::new);
-
         EntityModelLayerRegistry.registerModelLayer(FAIRY_MODEL_LAYER, FairyEntityModel::getTexturedModelData);
         BlockRenderLayerMap.INSTANCE.putBlock(CrystalFortunes.CRYSTAL_BALL, RenderLayer.getCutout());
 
@@ -75,7 +80,10 @@ public class CrystalFortunesClient implements ClientModInitializer {
             Text name = null;
             if (prediction instanceof LovePrediction love) {
                 requestShader(LOVE_SHADER);
-                name = ((WorldInvoker) context.client().world).invokeGetEntityLookup().get(love.lover()).getName();
+                Entity player = ((WorldInvoker) context.client().world).invokeGetEntityLookup().get(love.lover());
+                if (player != null) {
+                    name = player.getName();
+                }
             }
             if (prediction instanceof NullPrediction) {
                 releaseShader(LOVE_SHADER, true);
@@ -103,8 +111,20 @@ public class CrystalFortunesClient implements ClientModInitializer {
             });
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(DialoguePayload.DIALOGUE_ID, (payload, context) -> {
+            if (payload.random()) {
+                List<Text> lines = translationsLookup.get(Identifier.of(CrystalFortunes.MODID, "dialogue")).get(payload.translate());
+                dialogueRenderer.addText(lines.get(MinecraftClient.getInstance().world.random.nextInt(lines.size())));
+            }
+            else {
+                dialogueRenderer.addText(Text.translatable(payload.translate()));
+            }
+        });
+
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (needLoveEffects()) { HeartRenderer.increaseSize(); }
+            if (needLoveEffects()) {
+                HeartRenderer.increaseSize();
+            }
             dialogueRenderer.tick();
         });
 
@@ -116,13 +136,47 @@ public class CrystalFortunesClient implements ClientModInitializer {
         }
 
         ShaderEffectRenderCallback.EVENT.register((tickDelta) -> {
-            if (!shaderRequests.isEmpty()) {
+            if (!shaderRequests.isEmpty() && shadersEnabled) {
                 shaderRequests.getFirst().render(tickDelta);
             }
         });
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             prediction = new NullPrediction();
             shaderRequests.clear();
+        }));
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("predictionshader")
+                .executes(context -> {
+                    if (shadersEnabled) {
+                        context.getSource().sendFeedback(Text.translatable("commands.crystal_fortunes.enabled"));
+                    } else {
+                        context.getSource().sendFeedback(Text.translatable("commands.crystal_fortunes.disabled"));
+                    }
+                    return 1;
+                }).then(ClientCommandManager.literal("enable").executes(context -> {
+                    shadersEnabled = true;
+                    context.getSource().sendFeedback(Text.translatable("commands.crystal_fortunes.enabled"));
+                    return 1;
+                })).then(ClientCommandManager.literal("disable").executes(context -> {
+                    shadersEnabled = false;
+                    context.getSource().sendFeedback(Text.translatable("commands.crystal_fortunes.disabled"));
+                    return 1;
+                })).then(ClientCommandManager.literal("reset").executes(context -> {
+                    shaderRequests.clear();
+                    context.getSource().sendFeedback(Text.translatable("commands.crystal_fortunes.reset_shaders"));
+                    return 1;
+                }))
+        ));
+
+        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+            if (client.player != null) {
+                var iterator = client.player.getArmorItems().iterator();
+                while (iterator.hasNext()) {
+                    if (iterator.next().isOf(CrystalFortunes.ROSE_GLASSES)) {
+                        CrystalFortunesClient.requestShader(CrystalFortunesClient.LOVE_SHADER_2);
+                    }
+                }
+            }
         }));
     }
 
@@ -145,6 +199,24 @@ public class CrystalFortunesClient implements ClientModInitializer {
 
     public static void buildTranslations() {
         translationsLookup.clear();
+        Map<String, List<Text>> translation2 = new HashMap<>();
+        for (String type : new String[]{"predictionless"}) {
+            int i = 1;
+            List<Text> lines = new ArrayList<>();
+            String key = "dialogue." + CrystalFortunes.MODID + "." + type;
+            while (true) {
+                Text line = Text.translatable(key + "." + i);
+                if (!line.getString().equals(key + "." + i)) {
+                    lines.add(line);
+                } else {
+                    break;
+                }
+                i++;
+            }
+            translation2.put(key, lines);
+        }
+        translationsLookup.put(Identifier.of(CrystalFortunes.MODID, "dialogue"), translation2);
+
         PredictionType.PREDICTION_REGISTRY.getEntrySet().forEach((entry) -> {
             Identifier id = entry.getKey().getValue();
             Map<String, List<Text>> translations = new HashMap<>();

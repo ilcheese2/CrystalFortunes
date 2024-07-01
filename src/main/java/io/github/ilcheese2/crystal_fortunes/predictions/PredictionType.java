@@ -4,12 +4,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 
 public record PredictionType<T extends Prediction>(MapCodec<T> codec, PredictionFactory<T> factory) {
     public static final Registry<PredictionType<?>> PREDICTION_REGISTRY = new SimpleRegistry<>(
@@ -30,6 +30,6 @@ public record PredictionType<T extends Prediction>(MapCodec<T> codec, Prediction
 
     @FunctionalInterface
     public interface PredictionFactory<T extends Prediction> {
-        T create(PlayerEntity player, CrystalBallBlockEntity blockEntity);
+        T create(PlayerEntity player, BlockPos pos);
     }
 }

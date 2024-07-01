@@ -2,11 +2,11 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Uuids;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.UUID;
@@ -57,7 +57,7 @@ public record NeverHungryPrediction(UUID player) implements Prediction {
     }
 
 
-    NeverHungryPrediction(PlayerEntity playerEntity, CrystalBallBlockEntity blockEntity) {
+    NeverHungryPrediction(PlayerEntity playerEntity, BlockPos pos) {
         this(playerEntity.getUuid());
     }
 

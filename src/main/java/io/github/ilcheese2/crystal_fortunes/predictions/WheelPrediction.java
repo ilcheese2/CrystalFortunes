@@ -3,7 +3,6 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import io.github.ilcheese2.crystal_fortunes.networking.UpdateWheelPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.hyper_pigeon.wacky_wheel.WheelOfWacky;
@@ -27,7 +26,7 @@ public record WheelPrediction(UUID player, WackyWheelBlockEntity wheel) implemen
     private static PredictionType<WheelPrediction> WHEEL;
 
     public static void register() {
-        WHEEL = PredictionType.register("wheel", new PredictionType<>(WheelPrediction.CODEC, WheelPrediction::create));;
+        WHEEL = PredictionType.register("wheel", new PredictionType<>(WheelPrediction.CODEC, WheelPrediction::create));
     }
 
     static class FakeWrapper implements RegistryWrapper.WrapperLookup {
@@ -40,12 +39,12 @@ public record WheelPrediction(UUID player, WackyWheelBlockEntity wheel) implemen
         public <T> Optional<RegistryWrapper.Impl<T>> getOptionalWrapper(RegistryKey<? extends Registry<? extends T>> registryRef) {
             return Optional.empty();
         }
-    };
+    }
 
     public static final MapCodec<WheelPrediction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(Uuids.CODEC.fieldOf("player").forGetter(WheelPrediction::player)
             ,NbtCompound.CODEC.fieldOf("wheel").forGetter((wheelPrediction -> wheelPrediction.wheel.createNbt(new FakeWrapper())))).apply(instance, WheelPrediction::fromNbt));
 
-    public static WheelPrediction create(PlayerEntity player, CrystalBallBlockEntity blockEntity) {
+    public static WheelPrediction create(PlayerEntity player, BlockPos pos) {
         var entity = new WackyWheelBlockEntity(BlockPos.ORIGIN, WheelOfWacky.WACKY_WHEEL_BLOCK.getDefaultState()) {
             @Override
             public void markDirty() {} // only good part of java

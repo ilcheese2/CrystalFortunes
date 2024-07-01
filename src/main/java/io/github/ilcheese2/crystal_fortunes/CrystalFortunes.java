@@ -1,5 +1,7 @@
 package io.github.ilcheese2.crystal_fortunes;
 
+import com.google.common.collect.Iterables;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import io.github.ilcheese2.crystal_fortunes.blocks.CrystalBallBlock;
 import io.github.ilcheese2.crystal_fortunes.blocks.HolyGrenadeBlock;
@@ -11,10 +13,12 @@ import io.github.ilcheese2.crystal_fortunes.entities.SinEntity;
 import io.github.ilcheese2.crystal_fortunes.items.HolyGrenadeItem;
 import io.github.ilcheese2.crystal_fortunes.items.RingItem;
 import io.github.ilcheese2.crystal_fortunes.items.RoseGlassesItem;
+import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
 import io.github.ilcheese2.crystal_fortunes.networking.UpdateWheelPayload;
 import io.github.ilcheese2.crystal_fortunes.predictions.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -26,12 +30,20 @@ import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.IdentifierArgumentType;
+import net.minecraft.command.suggestion.SuggestionProviders;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.*;
 import net.minecraft.particle.SimpleParticleType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -39,7 +51,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public class CrystalFortunes implements ModInitializer {
 
@@ -75,6 +91,8 @@ public class CrystalFortunes implements ModInitializer {
 
     public static final boolean WHEEL_OF_WACKY_LOADED = FabricLoader.getInstance().isModLoaded("wacky_wheel");
 
+    public static final SuggestionProvider<ServerCommandSource> AVAILABLE_PREDICTIONS = SuggestionProviders.register(Identifier.of(MODID, "predictions"), (context, builder) -> CommandSource.suggestIdentifiers(Iterables.transform(PredictionType.PREDICTION_REGISTRY.getKeys(), RegistryKey::getValue), builder));
+
     public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
     @Override
@@ -90,6 +108,7 @@ public class CrystalFortunes implements ModInitializer {
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(content -> content.addAfter(Items.END_CRYSTAL, CRYSTAL_BALL_ITEM));
         PayloadTypeRegistry.playS2C().register(PredictionPayload.PREDICTION_ID, PredictionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(DialoguePayload.DIALOGUE_ID, DialoguePayload.CODEC);
         if (WHEEL_OF_WACKY_LOADED) {
             PayloadTypeRegistry.playS2C().register(UpdateWheelPayload.UPDATE_WHEEL_ID, UpdateWheelPayload.CODEC);
             WheelPrediction.register();
@@ -107,12 +126,7 @@ public class CrystalFortunes implements ModInitializer {
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) ->  {
             CameraData.fixPlayer(handler.getPlayer());
             Prediction prediction = PredictionData.getServerState(server).predictions.get(handler.getPlayer().getUuid());
-            if (prediction != null) {
-                handler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));
-            }
-            else {
-                handler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(new NullPrediction())));
-            }
+            handler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(Objects.requireNonNullElseGet(prediction, NullPrediction::new))));
         }));
         UseEntityCallback.EVENT.register((player1, world, hand, entity, hitResult) -> {
             if (LovePrediction.lovers.containsKey(player1.getUuid()) && LovePrediction.lovers.get(player1.getUuid()) == entity.getUuid()) {
@@ -128,5 +142,72 @@ public class CrystalFortunes implements ModInitializer {
             }
             return ActionResult.PASS;
         });
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("predictions")
+                .then(literal("info").executes(context -> {
+                    if (context.getSource().getPlayer() != null) {
+                        Prediction prediction = PredictionData.hasPrediction(context.getSource().getPlayer());
+                        if (prediction != null) {
+                            context.getSource().sendFeedback(() -> Text.of(prediction.toString()), false);
+                        }
+                    }
+                    return 1;
+                }).then(argument("player", EntityArgumentType.players()).executes(context -> {
+                    EntityArgumentType.getPlayers(context, "player").forEach(player -> {
+                        Prediction prediction = PredictionData.hasPrediction(player);
+                        context.getSource().sendFeedback(() -> Text.of(prediction.toString()), false);
+                    });
+                    return 1;
+                })))
+                .then(literal("clear").requires(source -> source.hasPermissionLevel(2)).executes(context -> {
+                    if (context.getSource().getPlayer() != null) {
+                        PredictionData.deletePrediction(context.getSource().getPlayer().getUuid());
+                        context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.clear"), false);
+                    }
+                    return 1;
+                }).then(argument("player", EntityArgumentType.players()).executes(context -> {
+                    EntityArgumentType.getPlayers(context, "player").forEach(player -> PredictionData.deletePrediction(player.getUuid()));
+                    context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.clear"), false);
+                    return 1;
+                })).then(literal("all").executes(context -> {
+                    PredictionData.deleteAllPredictions(context.getSource().getWorld());
+                    context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.clear"), false);
+                    return 1;
+                }))).then(literal("give").requires(source -> source.hasPermissionLevel(2)).then(argument("prediction", IdentifierArgumentType.identifier()).suggests(AVAILABLE_PREDICTIONS).executes(context -> {
+                    ServerPlayerEntity player = context.getSource().getPlayer();
+                    if (player != null) {
+                        Identifier id = IdentifierArgumentType.getIdentifier(context, "prediction");
+                        var type = PredictionType.PREDICTION_REGISTRY.get(id);
+                        if (type != null) {
+                            if (PredictionData.setPrediction(player, type) != null) {
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction"), false);
+                            }
+                            else {
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction_failed"), false);
+                            }
+                        }
+                        else {
+                            context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.invalid_prediction", id.toString()), false);
+                        }
+                    }
+                    return 1;
+                }).then(argument("player", EntityArgumentType.players()).executes(context -> {
+                    Identifier id = IdentifierArgumentType.getIdentifier(context, "prediction");
+                    var type = PredictionType.PREDICTION_REGISTRY.get(id);
+                    if (type != null) {
+                        EntityArgumentType.getPlayers(context, "player").forEach(player -> {
+                            if (PredictionData.setPrediction(player, type) != null) {
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction.1", player.getPlayerListName()), false);
+                            }
+                            else {
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction_failed.1", player.getPlayerListName()), false);
+                            }
+                        });
+                    }
+                    else {
+                        context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.invalid_prediction", id.toString()), false);
+                    }
+                    return 1;
+                }))))));
     }
 }

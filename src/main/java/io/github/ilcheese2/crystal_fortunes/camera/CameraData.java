@@ -2,31 +2,25 @@ package io.github.ilcheese2.crystal_fortunes.camera;
 
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
-import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
-import io.github.ilcheese2.crystal_fortunes.predictions.LovePrediction;
-import io.github.ilcheese2.crystal_fortunes.predictions.PredictionData;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
 import net.minecraft.util.Uuids;
-import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 
 public class CameraData extends PersistentState {
@@ -65,13 +59,18 @@ public class CameraData extends PersistentState {
 
     public static CameraData getServerState(MinecraftServer server) {
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
-        return persistentStateManager.getOrCreate(type, CrystalFortunes.MODID+ ":camera");
+        return persistentStateManager.getOrCreate(type, CrystalFortunes.MODID+ "_camera");
     }
 
     public static void storePlayerData(ServerPlayerEntity player) {
         CameraData serverState = getServerState(Objects.requireNonNull(player.getWorld().getServer()));
         serverState.playerStates.computeIfAbsent(player.getUuid(), (uuid) -> new PlayerState(player));
         serverState.markDirty();
+    }
+
+    public static boolean isSpectating(ServerPlayerEntity player) {
+        CameraData serverState = getServerState(player.server);
+        return serverState.playerStates.containsKey(player.getUuid());
     }
 
     public static void fixPlayer(ServerPlayerEntity player) {
@@ -84,7 +83,7 @@ public class CameraData extends PersistentState {
         serverState.markDirty();
     }
 
-    public static CameraData createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+    private static CameraData createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         CameraData data = new CameraData();
         data.playerStates = Maps.newHashMap(CODEC.parse(NbtOps.INSTANCE, tag).result().get());
         return data;

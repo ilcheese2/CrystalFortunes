@@ -16,4 +16,8 @@ public class CrystalBallBlockEntity extends BlockEntity {
     public BlockEntityType<CrystalBallBlockEntity> getType() {
         return CrystalFortunes.CRYSTAL_BALL_BLOCK_ENTITY;
     }
+
+    public static void tick(World world, BlockPos pos, BlockState state, CrystalBallBlockEntity blockEntity) {
+
+    }
 }

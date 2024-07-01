@@ -11,7 +11,7 @@ public class MagicParticle extends CampfireSmokeParticle {
 
     MagicParticle(ClientWorld world, double x, double y, double z, double velocityX, double velocityY, double velocityZ, boolean signal) {
         super(world, x, y, z, velocityX, velocityY, velocityZ, signal);
-        this.scale(3.0f);
+        this.scale(2.7f);
         this.setBoundingBoxSpacing(0, 0);
         this.maxAge = 3 * 20;
         this.alpha = 0.75f;

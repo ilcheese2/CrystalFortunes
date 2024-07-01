@@ -2,13 +2,13 @@ package io.github.ilcheese2.crystal_fortunes.predictions;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.ilcheese2.crystal_fortunes.blockentities.CrystalBallBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Uuids;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public record LovePrediction(UUID player, UUID lover) implements Prediction {
     }
 
 
-    public static LovePrediction create(PlayerEntity playerEntity, CrystalBallBlockEntity blockEntity) {
+    public static LovePrediction create(PlayerEntity playerEntity, BlockPos pos) {
         List<ServerPlayerEntity> playerList = playerEntity.getWorld().getServer().getPlayerManager().getPlayerList();
         if (playerList.size() < 2) {
             return null;

@@ -3,14 +3,10 @@ package io.github.ilcheese2.crystal_fortunes.mixin;
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
 import io.github.ilcheese2.crystal_fortunes.items.RoseGlassesItem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
-import net.minecraft.client.render.entity.feature.ElytraFeatureRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MinecartItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,7 +21,7 @@ public class LivingEntityMixin {
                 if (slot == EquipmentSlot.HEAD && newStack.getItem() instanceof RoseGlassesItem) {
                     CrystalFortunesClient.requestShader(CrystalFortunesClient.LOVE_SHADER_2);
                 } else {
-                    CrystalFortunesClient.releaseShader(CrystalFortunesClient.LOVE_SHADER_2);
+                    CrystalFortunesClient.releaseShader(CrystalFortunesClient.LOVE_SHADER_2, true);
                 }
             }
         }
