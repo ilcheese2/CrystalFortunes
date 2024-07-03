@@ -35,6 +35,10 @@ public record LovePrediction(UUID player, UUID lover) implements Prediction {
 
     }
 
+    @Override
+    public void cleanup(World world) {
+
+    }
 
     public static LovePrediction create(PlayerEntity playerEntity, BlockPos pos) {
         List<ServerPlayerEntity> playerList = playerEntity.getWorld().getServer().getPlayerManager().getPlayerList();

@@ -92,7 +92,7 @@ public class PredictionData extends PersistentState {
     public static void clearPredictionsToBeDeleted(World world) {
         PredictionData serverState = getServerState(Objects.requireNonNull(world.getServer()));
         for (UUID player: playersToRemove) {
-            serverState.predictions.remove(player);
+            serverState.predictions.remove(player).cleanup(world);
             if ( world.getServer().getPlayerManager().getPlayer(player) != null) {
                 (world.getServer().getPlayerManager().getPlayer(player)).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(new NullPrediction())));
             }

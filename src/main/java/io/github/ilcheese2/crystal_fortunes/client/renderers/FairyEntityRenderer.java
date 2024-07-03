@@ -3,12 +3,11 @@ package io.github.ilcheese2.crystal_fortunes.client.renderers;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
 import io.github.ilcheese2.crystal_fortunes.entities.FairyEntity;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.MobEntityRenderer;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.entity.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 public class FairyEntityRenderer extends MobEntityRenderer<FairyEntity, FairyEntityModel> {
     public FairyEntityRenderer(EntityRendererFactory.Context ctx) {
@@ -18,6 +17,11 @@ public class FairyEntityRenderer extends MobEntityRenderer<FairyEntity, FairyEnt
     @Override
     public Identifier getTexture(FairyEntity entity) {
         return Identifier.of(CrystalFortunes.MODID, "textures/entity/fairy/fairy.png");
+    }
+    @Nullable
+    @Override
+    protected RenderLayer getRenderLayer(FairyEntity entity, boolean showBody, boolean translucent, boolean showOutline) {
+        return super.getRenderLayer(entity, showBody, DialogueRenderer.fairyAlpha < 0xFF, showOutline);
     }
 
 }

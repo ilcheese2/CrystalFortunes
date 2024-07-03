@@ -87,6 +87,10 @@ public record WheelPrediction(UUID player, WackyWheelBlockEntity wheel) implemen
     }
 
     @Override
+    public void cleanup(World world) {
+    }
+
+    @Override
     public PredictionType<?> getType() {
         return WHEEL;
     }

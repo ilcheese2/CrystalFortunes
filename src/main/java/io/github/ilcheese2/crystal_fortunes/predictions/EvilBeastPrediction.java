@@ -50,6 +50,12 @@ public record EvilBeastPrediction(UUID player, UUID rabbit) implements Predictio
         }
     }
 
+    @Override
+    public void cleanup(World world) {
+        if (((ServerWorld) world).getEntity(rabbit) != null) {
+            ((ServerWorld) world).getEntity(rabbit).discard();
+        }
+    }
 
     public static EvilBeastPrediction create(PlayerEntity playerEntity, BlockPos pos) {
         ServerWorld world = (ServerWorld) playerEntity.getWorld();

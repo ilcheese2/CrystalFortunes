@@ -20,6 +20,9 @@ public record NullPrediction() implements Prediction {
     public void tick(World world) {
     }
 
+    @Override
+    public void cleanup(World world) {
+    }
 
     public static NullPrediction create(PlayerEntity playerEntity, BlockPos pos) {
         return null;

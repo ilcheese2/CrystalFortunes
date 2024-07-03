@@ -28,6 +28,8 @@ public interface Prediction {
 
     void tick(World world);
 
+    void cleanup(World world);
+
     CheckedRandom random = new CheckedRandom(TimeHelper.SECOND_IN_NANOS); // fuck it we ball
 
     static Prediction generatePrediction(PlayerEntity player, BlockPos pos) {

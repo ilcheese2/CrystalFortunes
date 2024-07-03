@@ -3,7 +3,8 @@
 	"textures": {
 		"1": "minecraft:block/glass",
 		"3": "minecraft:block/oak_log_top",
-		"4": "minecraft:block/oak_log"
+		"4": "minecraft:block/oak_log",
+		"particle": "minecraft:block/oak_log"
 	},
 	"elements": [
 		{

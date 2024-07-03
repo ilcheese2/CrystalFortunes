@@ -37,7 +37,7 @@ import java.util.UUID;
 
 public class SinEntity<T extends LivingEntity> extends HostileEntity {
 
-    public EntityType<T> appearanceType = (EntityType<T>) EntityType.ARMADILLO;
+    public EntityType<T> appearanceType = null;
     private static final TrackedData<String> ENTITY_TYPE = DataTracker.registerData(SinEntity.class, TrackedDataHandlerRegistry.STRING);
     private static final TrackedData<Optional<UUID>> SINNER = DataTracker.registerData(SinEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     public SinEntity(EntityType<SinEntity> entityType, World world) {
@@ -130,6 +130,9 @@ public class SinEntity<T extends LivingEntity> extends HostileEntity {
 
     @Override
     protected EntityDimensions getBaseDimensions(EntityPose pose) {
+        if (this.appearanceType == null) {
+            return super.getBaseDimensions(pose);
+        }
         return appearanceType.getDimensions();
     }
 
@@ -241,16 +244,20 @@ public class SinEntity<T extends LivingEntity> extends HostileEntity {
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         appearanceType = (EntityType<T>) Registries.ENTITY_TYPE.get(Identifier.of(nbt.getString("appearanceID")));
-        sinner = nbt.getUuid("sinner");
+        if (nbt.contains("sinner")) {
+            sinner = nbt.getUuid("sinner");
+            this.dataTracker.set(SINNER, Optional.of(sinner));
+        }
         this.dataTracker.set(ENTITY_TYPE, EntityType.getId(appearanceType).toString());
-        this.dataTracker.set(SINNER, Optional.of(sinner));
         super.readCustomDataFromNbt(nbt);
     }
 
     @Override
     public void writeCustomDataToNbt(NbtCompound nbt) {
         nbt.putString("appearanceID", EntityType.getId(appearanceType).toString());
-        nbt.putUuid("sinner", sinner);
+        if (sinner != null) {
+            nbt.putUuid("sinner", sinner);
+        }
         super.writeCustomDataToNbt(nbt);
     }
 

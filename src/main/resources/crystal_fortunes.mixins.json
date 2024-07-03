@@ -12,15 +12,16 @@
     "WorldInvoker"
   ],
   "client": [
+    "BlockEntityAccessor",
     "ClientPlayerEntityMixin",
     "ClientPlayNetworkHandlerMixin",
     "EntityRendererInvoker",
     "EntityRenderersAccessor",
     "GameRendererMixin",
     "InGameHudMixin",
-    "BlockEntityAccessor",
     "LanguageManagerMixin",
-    "LivingEntityMixin"
+    "LivingEntityMixin",
+    "LivingEntityRendererInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

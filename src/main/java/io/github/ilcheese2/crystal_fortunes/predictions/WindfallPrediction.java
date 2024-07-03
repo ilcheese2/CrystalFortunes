@@ -44,6 +44,11 @@ public record WindfallPrediction(UUID uuid, BlockBox safeArea) implements Predic
     }
 
     @Override
+    public void cleanup(World world) {
+
+    }
+
+    @Override
     public PredictionType<?> getType() {
         return PredictionType.WINDFALL;
     }

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.entities.SinEntity;
 import io.github.ilcheese2.crystal_fortunes.mixin.StatTypeAccessor;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
@@ -62,6 +63,13 @@ public record SinPrediction(UUID player, UUID sin) implements Prediction {
         entity.setPosition(playerEntity.getPos().add(XZ_DISTANCE_MIN+Prediction.random.nextDouble()*(XZ_DISTANCE_MAX-XZ_DISTANCE_MIN), Y_DISTANCE_MIN+Prediction.random.nextDouble()*(Y_DISTANCE_MAX-Y_DISTANCE_MIN),XZ_DISTANCE_MIN+Prediction.random.nextDouble()*(XZ_DISTANCE_MAX-XZ_DISTANCE_MIN)));
         ((ServerPlayerEntity) playerEntity).getServerWorld().spawnEntity(entity);
         return new SinPrediction(playerEntity.getUuid(), entity.getUuid());
+    }
+
+    @Override
+    public void cleanup(World world) {
+        if (((ServerWorld) world).getEntity(sin) != null) {
+            ((ServerWorld) world).getEntity(sin).discard();
+        }
     }
 
     @Override

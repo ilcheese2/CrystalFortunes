@@ -113,6 +113,10 @@ public class FairyEntityModel extends SinglePartEntityModel<FairyEntity> {
     }
     @Override
     public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
+        if (DialogueRenderer.fairyAlpha < 0xFF) {
+            color = 0xFFFFFF | (DialogueRenderer.fairyAlpha << 24);
+        }
+
         uhhanimatestuff.render(matrices, vertexConsumer, light, overlay, color);
     }
 

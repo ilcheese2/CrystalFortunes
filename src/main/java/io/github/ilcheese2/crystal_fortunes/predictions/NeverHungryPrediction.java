@@ -56,6 +56,8 @@ public record NeverHungryPrediction(UUID player) implements Prediction {
         }
     }
 
+    public void cleanup(World world) {}
+
 
     NeverHungryPrediction(PlayerEntity playerEntity, BlockPos pos) {
         this(playerEntity.getUuid());
