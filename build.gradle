@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -47,7 +47,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "org.ladysnake:satin:${satin_version}"
-    modCompileOnly("maven.modrinth:wheel-of-wacky:${wheel_version}")
+    include "org.ladysnake:satin:${satin_version}"
+    modCompileOnly("maven.modrinth:wheel-of-wacky:+")
+    modCompileOnly("maven.modrinth:honque:+")
 }
 
 processResources {
@@ -61,6 +63,10 @@ processResources {
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version
     }
+}
+
+fabricApi {
+    configureDataGeneration()
 }
 
 def targetJavaVersion = 21

@@ -1,6 +1,7 @@
 package io.github.ilcheese2.crystal_fortunes.predictions;
 
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
+import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.EntityType;
@@ -47,8 +48,13 @@ public interface Prediction {
         while (iterator.hasNext() && prediction == null) {
             prediction = iterator.next().getValue().factory().create(player, pos);
         }
-
-        ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));
+        if (prediction != null) {
+            PredictionData.sendPredictionToClient(prediction, (ServerPlayerEntity) player);
+        }
         return prediction;
+    }
+
+    default String getTranslationKey() {
+        return "prediction." + CrystalFortunes.MODID  + "." + PredictionType.PREDICTION_REGISTRY.getKey(getType()).get().getValue().getPath();
     }
 }

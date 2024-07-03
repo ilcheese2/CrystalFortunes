@@ -7,7 +7,9 @@ import io.github.ilcheese2.crystal_fortunes.camera.ServerCameraHandler;
 import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
 import io.github.ilcheese2.crystal_fortunes.entities.FairyEntity;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
+import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.predictions.*;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -36,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static io.github.ilcheese2.crystal_fortunes.CrystalFortunes.CRYSTAL_BALL_BLOCK_ENTITY;
+import static io.github.ilcheese2.crystal_fortunes.predictions.PredictionData.getOrCreatePrediction;
 import static io.github.ilcheese2.crystal_fortunes.predictions.PredictionData.getPrediction;
 
 public class CrystalBallBlock extends HorizontalFacingBlock implements BlockEntityProvider {
@@ -64,24 +67,16 @@ public class CrystalBallBlock extends HorizontalFacingBlock implements BlockEnti
                 ((ClientWorld) world).setTimeOfDay(18000);
                 return ActionResult.SUCCESS;
             }
-            List<Text> lines = CrystalFortunesClient.translationsLookup.get(PredictionType.PREDICTION_REGISTRY.getKey(CrystalFortunesClient.prediction.getType()).get().getValue()).get("while");
-
-            if (!lines.isEmpty()) {
-                Text dialogue = lines.get(world.random.nextInt(lines.size()));
-                if ( CrystalFortunesClient.prediction instanceof LovePrediction love) {
-                    Entity lover = ((WorldInvoker) MinecraftClient.getInstance().world).invokeGetEntityLookup().get(love.lover());
-                    if (lover != null) {
-                        String name = lover.getName().getString();
-                        dialogue = Text.of(dialogue.getString().replace("{name}", name));
-                    }
-                }
-                CrystalFortunesClient.dialogueRenderer.addText(dialogue);
-            }
-
             return ActionResult.SUCCESS;
         }
 
-        Prediction prediction = getPrediction(player, pos);
+        Prediction prediction = getPrediction(player);
+
+        if (prediction != null) {
+            ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new DialoguePayload(prediction.getTranslationKey() + ".while", true)));
+        } else {
+            prediction = getOrCreatePrediction(player, pos);
+        }
 
         if (prediction instanceof EvilBeastPrediction beastPrediction) {
             ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, ((WorldInvoker) world).invokeGetEntityLookup().get(beastPrediction.rabbit()));
@@ -91,6 +86,7 @@ public class CrystalBallBlock extends HorizontalFacingBlock implements BlockEnti
                 ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, entity);
             }
         }
+
 
         //CrystalFortunes.LOGGER.info(getPlayerPrediction(player, (CrystalBallBlockEntity) world.getBlockEntity(pos)).toString());
         return ActionResult.SUCCESS;
@@ -103,7 +99,11 @@ public class CrystalBallBlock extends HorizontalFacingBlock implements BlockEnti
         Direction direction = state.get(FACING);
         fairy.setPosition(pos.toCenterPos().add(direction.getOffsetX(), direction.getOffsetY(), direction.getOffsetZ()));
         fairy.setYaw(direction.getOpposite().asRotation());
+        fairy.setHeadYaw(fairy.getYaw());
         fairy.prevYaw = fairy.getYaw();
+        fairy.prevHeadYaw =  fairy.getYaw();
+        fairy.prevBodyYaw =  fairy.getYaw();
+        fairy.bodyYaw =  fairy.getYaw();
         world.spawnEntity(fairy);
     }
 

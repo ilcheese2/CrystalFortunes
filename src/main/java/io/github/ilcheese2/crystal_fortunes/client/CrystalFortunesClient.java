@@ -3,6 +3,7 @@ package io.github.ilcheese2.crystal_fortunes.client;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.client.particle.MagicParticle;
 import io.github.ilcheese2.crystal_fortunes.client.renderers.*;
+import io.github.ilcheese2.crystal_fortunes.items.CrystalHonk;
 import io.github.ilcheese2.crystal_fortunes.mixin.WorldInvoker;
 import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
@@ -22,10 +23,17 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.event.client.player.ClientPlayerBlockBreakEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
@@ -52,7 +60,7 @@ public class CrystalFortunesClient implements ClientModInitializer {
     public static final EntityModelLayer FAIRY_MODEL_LAYER = new EntityModelLayer(Identifier.of(CrystalFortunes.MODID, "fairy"), "main");
 
     // typeofprediction -> event -> lines
-    public static final Map<Identifier, Map<String, List<Text>>> translationsLookup = new HashMap<>();
+    public static final Map<String, List<Text>> translationsLookup = new HashMap<>();
 
     private static List<ManagedShaderEffect> shaderRequests = new ArrayList<>();
     public static DialogueRenderer dialogueRenderer;
@@ -73,17 +81,16 @@ public class CrystalFortunesClient implements ClientModInitializer {
         EntityModelLayerRegistry.registerModelLayer(FAIRY_MODEL_LAYER, FairyEntityModel::getTexturedModelData);
         BlockRenderLayerMap.INSTANCE.putBlock(CrystalFortunes.CRYSTAL_BALL, RenderLayer.getCutout());
 
+        if (CrystalFortunes.HONQUE_LOADED) {
+            CrystalHonk.registerArmorRenderer();
+        }
+
         ParticleFactoryRegistry.getInstance().register(CrystalFortunes.MAGIC_PARTICLE, MagicParticle.MagicParticleFactory::new);
 
         ClientPlayNetworking.registerGlobalReceiver(PredictionPayload.PREDICTION_ID, (payload, context) -> {
             prediction = payload.prediction();
-            Text name = null;
-            if (prediction instanceof LovePrediction love) {
+            if (prediction instanceof LovePrediction) {
                 requestShader(LOVE_SHADER);
-                Entity player = ((WorldInvoker) context.client().world).invokeGetEntityLookup().get(love.lover());
-                if (player != null) {
-                    name = player.getName();
-                }
             }
             if (prediction instanceof NullPrediction) {
                 releaseShader(LOVE_SHADER, true);
@@ -92,14 +99,6 @@ public class CrystalFortunesClient implements ClientModInitializer {
             if (CrystalFortunes.WHEEL_OF_WACKY_LOADED) {
                 WheelRenderer.handlePrediction(prediction);
             }
-
-            List<Text> lines = translationsLookup.get(PredictionType.PREDICTION_REGISTRY.getKey(prediction.getType()).get().getValue()).get("receive");
-            Text dialogue = lines.get(MinecraftClient.getInstance().world.random.nextInt(lines.size()));
-
-            if (name != null) {
-                dialogue = Text.of(dialogue.getString().replace("{name}", name.getString()));
-            }
-            dialogueRenderer.addText(dialogue);
         });
 
         if (CrystalFortunes.WHEEL_OF_WACKY_LOADED) {
@@ -113,11 +112,13 @@ public class CrystalFortunesClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(DialoguePayload.DIALOGUE_ID, (payload, context) -> {
             if (payload.random()) {
-                List<Text> lines = translationsLookup.get(Identifier.of(CrystalFortunes.MODID, "dialogue")).get(payload.translate());
-                dialogueRenderer.addText(lines.get(MinecraftClient.getInstance().world.random.nextInt(lines.size())));
+                List<Text> lines = translationsLookup.get(payload.translate());
+                Text line = lines.get(MinecraftClient.getInstance().world.random.nextInt(lines.size()));
+                dialogueRenderer.addText(handleLoveReplacement(line));
             }
             else {
-                dialogueRenderer.addText(Text.translatable(payload.translate()));
+                Text line = Text.translatable(payload.translate());
+                dialogueRenderer.addText(handleLoveReplacement(line));
             }
         });
 
@@ -127,6 +128,8 @@ public class CrystalFortunesClient implements ClientModInitializer {
             }
             dialogueRenderer.tick();
         });
+
+        //ScreenHandler
 
         HeartRenderer.initialize();
 
@@ -140,6 +143,7 @@ public class CrystalFortunesClient implements ClientModInitializer {
                 shaderRequests.getFirst().render(tickDelta);
             }
         });
+
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             prediction = new NullPrediction();
             shaderRequests.clear();
@@ -167,17 +171,6 @@ public class CrystalFortunesClient implements ClientModInitializer {
                     return 1;
                 }))
         ));
-
-        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            if (client.player != null) {
-                var iterator = client.player.getArmorItems().iterator();
-                while (iterator.hasNext()) {
-                    if (iterator.next().isOf(CrystalFortunes.ROSE_GLASSES)) {
-                        CrystalFortunesClient.requestShader(CrystalFortunesClient.LOVE_SHADER_2);
-                    }
-                }
-            }
-        }));
     }
 
     public static void requestShader(ManagedShaderEffect shader) {
@@ -199,8 +192,7 @@ public class CrystalFortunesClient implements ClientModInitializer {
 
     public static void buildTranslations() {
         translationsLookup.clear();
-        Map<String, List<Text>> translation2 = new HashMap<>();
-        for (String type : new String[]{"predictionless"}) {
+        for (String type : new String[]{"predictionless", "honk"}) {
             int i = 1;
             List<Text> lines = new ArrayList<>();
             String key = "dialogue." + CrystalFortunes.MODID + "." + type;
@@ -213,13 +205,12 @@ public class CrystalFortunesClient implements ClientModInitializer {
                 }
                 i++;
             }
-            translation2.put(key, lines);
+            translationsLookup.put(key, lines);
         }
-        translationsLookup.put(Identifier.of(CrystalFortunes.MODID, "dialogue"), translation2);
+
 
         PredictionType.PREDICTION_REGISTRY.getEntrySet().forEach((entry) -> {
             Identifier id = entry.getKey().getValue();
-            Map<String, List<Text>> translations = new HashMap<>();
             for (String type : new String[]{"while", "receive"}) {
                 List<Text> lines = new ArrayList<>();
                 int i = 1;
@@ -236,13 +227,23 @@ public class CrystalFortunesClient implements ClientModInitializer {
                 if (lines.isEmpty() && !type.equals("while")) {
                     lines.add(Text.of(key));
                 }
-                translations.put(type, lines);
+                translationsLookup.put(key, lines);
             }
-            translationsLookup.put(id, translations);
         });
     }
 
     public static boolean needLoveEffects() {
         return !shaderRequests.isEmpty() && (shaderRequests.getFirst() == LOVE_SHADER || shaderRequests.getFirst() == LOVE_SHADER_2);
+    }
+
+    private static Text handleLoveReplacement(Text line) {
+        if (prediction instanceof LovePrediction love) {
+            Entity player = ((WorldInvoker) MinecraftClient.getInstance().world).invokeGetEntityLookup().get(love.lover());
+            if (player != null) {
+                String name = player.getName().getString();
+                 return Text.of(line.getString().replace("{name}", name));
+            }
+        }
+        return line;
     }
 }

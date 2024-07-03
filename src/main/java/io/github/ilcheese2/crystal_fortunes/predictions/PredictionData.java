@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
+import io.github.ilcheese2.crystal_fortunes.networking.DialoguePayload;
 import io.github.ilcheese2.crystal_fortunes.networking.PredictionPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,12 +54,23 @@ public class PredictionData extends PersistentState {
         return state;
     }
 
-    public static Prediction hasPrediction(PlayerEntity player) {
+    public static Prediction getPrediction(PlayerEntity player) {
         PredictionData serverState = getServerState(Objects.requireNonNull(player.getWorld().getServer()));
         return serverState.predictions.getOrDefault(player.getUuid(), null);
     }
 
-    public static Prediction getPrediction(PlayerEntity player, BlockPos pos) {
+    public static boolean hasPrediction(PlayerEntity player) {
+       return getPrediction(player) != null;
+    }
+
+    public static void sendPredictionToClient(Prediction prediction, ServerPlayerEntity player) {
+        String key = prediction.getTranslationKey() + ".receive";
+        player.networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));
+        player.networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new DialoguePayload(key, true)));
+    }
+
+
+    public static Prediction getOrCreatePrediction(PlayerEntity player, BlockPos pos) {
         PredictionData serverState = getServerState(Objects.requireNonNull(player.getWorld().getServer()));
         Prediction prediction = serverState.predictions.computeIfAbsent(player.getUuid(), (uuid) -> Prediction.generatePrediction(player, pos));
         serverState.markDirty();
@@ -74,7 +86,7 @@ public class PredictionData extends PersistentState {
                 return null;
             }
             serverState.predictions.put(player.getUuid(), prediction);
-            ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(prediction)));
+            sendPredictionToClient(prediction, (ServerPlayerEntity) player);
         }
         serverState.markDirty();
         return prediction;

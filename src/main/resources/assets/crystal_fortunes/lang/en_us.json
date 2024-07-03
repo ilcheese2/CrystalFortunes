@@ -2,6 +2,7 @@
   "item.crystal_fortunes.ring": "Ring",
   "item.crystal_fortunes.rose_glasses": "Rose Glasses",
   "item.crystal_fortunes.holy_grenade": "Holy Grenade",
+  "item.crystal_fortunes.the_crystal_funny": "The Crystal Funny",
   "block.crystal_fortunes.crystal_ball": "Crystal Ball",
   "entity.crystal_fortunes.sin": "Sin",
   "entity.crystal_fortunes.falling_gold": "Falling Gold Block",
@@ -36,6 +37,7 @@
   "prediction.crystal_fortunes.windfall.while.1":  "Take a hike",
   "prediction.crystal_fortunes.wheel.receive.1":  "Take a gamble",
   "prediction.crystal_fortunes.wheel.receive.2":  "Let's see how your fortune fares",
+  "prediction.crystal_fortunes.honk.receive.1":  "Get honked - the spirits",
   "dialogue.crystal_fortunes.predictionless.1":  "How are you?",
   "dialogue.crystal_fortunes.predictionless.2":  "Try your hand at the crystal ball",
   "dialogue.crystal_fortunes.predictionless.3":  "Nice meeting you",
@@ -43,5 +45,16 @@
   "dialogue.crystal_fortunes.clear.1":  "Hello",
   "dialogue.crystal_fortunes.clear.2":  "Would you like to request a new fate?",
   "dialogue.crystal_fortunes.clear.3":  "Are you sure?",
-  "dialogue.crystal_fortunes.clear.4":  "The spirits deem it so"
+  "dialogue.crystal_fortunes.clear.4":  "The spirits deem it so",
+  "dialogue.crystal_fortunes.honk.1":  "An interesting medium, but it shall suffice",
+  "advancements.crystal_fortunes.predictions.rabbit_of_caerbannog.title": "Rabbit of Caerbannog",
+  "advancements.crystal_fortunes.predictions.rabbit_of_caerbannog.description": "Kill the rabbit of Caerbannog",
+  "advancements.crystal_fortunes.predictions.root.title": "Predictions",
+  "advancements.crystal_fortunes.predictions.root.description": "Have your fate predicted",
+  "advancements.crystal_fortunes.predictions.rose_glasses.title": "You know, it's funny; when you look at someone through rose-colored glasses, all the red flags just look like flags.",
+  "advancements.crystal_fortunes.predictions.rose_glasses.description": "Die while in love",
+  "advancements.crystal_fortunes.predictions.sins.title": "Letting Go of The Past",
+  "advancements.crystal_fortunes.predictions.sins.description": "Vanquish your sins",
+  "advancements.crystal_fortunes.predictions.true_love.title": "True Love at Last",
+  "advancements.crystal_fortunes.predictions.true_love.description": "Give a flower to your love"
 }

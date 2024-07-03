@@ -1,8 +1,14 @@
 package io.github.ilcheese2.crystal_fortunes.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
+import io.github.ilcheese2.crystal_fortunes.client.CrystalFortunesClient;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -36,6 +42,28 @@ public class ClientPlayNetworkHandlerMixin {
     private void tick(CallbackInfo info) {
         if (timer != 0 && timer != -1) {
             timer--;
+        }
+    }
+
+    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
+    private void fixShader(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
+        var item = MinecraftClient.getInstance().player.getEquippedStack(EquipmentSlot.HEAD);
+        if (item.isOf(CrystalFortunes.ROSE_GLASSES)) {
+            CrystalFortunesClient.requestShader(CrystalFortunesClient.LOVE_SHADER_2);
+        }
+        else {
+            CrystalFortunesClient.releaseShader(CrystalFortunesClient.LOVE_SHADER_2, true);
+        }
+    }
+
+    @Inject(method = "onInventory", at = @At("TAIL")) // this is so fucking infuriating
+    private void fixShader2(InventoryS2CPacket packet, CallbackInfo ci) {
+        var item = MinecraftClient.getInstance().player.getEquippedStack(EquipmentSlot.HEAD);
+        if (item.isOf(CrystalFortunes.ROSE_GLASSES)) {
+            CrystalFortunesClient.requestShader(CrystalFortunesClient.LOVE_SHADER_2);
+        }
+        else {
+            CrystalFortunesClient.releaseShader(CrystalFortunesClient.LOVE_SHADER_2, true);
         }
     }
 }

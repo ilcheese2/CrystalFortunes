@@ -10,6 +10,7 @@ import io.github.ilcheese2.crystal_fortunes.entities.FairyEntity;
 import io.github.ilcheese2.crystal_fortunes.entities.FallingGoldEntity;
 import io.github.ilcheese2.crystal_fortunes.entities.HolyGrenadeEntity;
 import io.github.ilcheese2.crystal_fortunes.entities.SinEntity;
+import io.github.ilcheese2.crystal_fortunes.items.CrystalHonk;
 import io.github.ilcheese2.crystal_fortunes.items.HolyGrenadeItem;
 import io.github.ilcheese2.crystal_fortunes.items.RingItem;
 import io.github.ilcheese2.crystal_fortunes.items.RoseGlassesItem;
@@ -90,6 +91,7 @@ public class CrystalFortunes implements ModInitializer {
     public static final SimpleParticleType MAGIC_PARTICLE = Registry.register(Registries.PARTICLE_TYPE, Identifier.of(MODID, "magic_particle"), FabricParticleTypes.simple());
 
     public static final boolean WHEEL_OF_WACKY_LOADED = FabricLoader.getInstance().isModLoaded("wacky_wheel");
+    public static final boolean HONQUE_LOADED = FabricLoader.getInstance().isModLoaded("honque");
 
     public static final SuggestionProvider<ServerCommandSource> AVAILABLE_PREDICTIONS = SuggestionProviders.register(Identifier.of(MODID, "predictions"), (context, builder) -> CommandSource.suggestIdentifiers(Iterables.transform(PredictionType.PREDICTION_REGISTRY.getKeys(), RegistryKey::getValue), builder));
 
@@ -99,20 +101,30 @@ public class CrystalFortunes implements ModInitializer {
     public void onInitialize() {
         FabricDefaultAttributeRegistry.register(SIN_ENTITY, SinEntity.createSinAttributes());
         FabricDefaultAttributeRegistry.register(FAIRY_ENTITY, FairyEntity.createFairyAttributes());
+
         Registry.register(Registries.BLOCK, Identifier.of(MODID, "crystal_ball"), CRYSTAL_BALL);
         Registry.register(Registries.BLOCK, Identifier.of(MODID, "holy_grenade"), HOLY_GRENADE_BLOCK);
+
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(content -> {
             content.addAfter(Items.ENDER_EYE, HOLY_GRENADE);
             content.addAfter(Items.ELYTRA, RING);
             content.addAfter(Items.SPYGLASS, ROSE_GLASSES);
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(content -> content.addAfter(Items.END_CRYSTAL, CRYSTAL_BALL_ITEM));
+
         PayloadTypeRegistry.playS2C().register(PredictionPayload.PREDICTION_ID, PredictionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(DialoguePayload.DIALOGUE_ID, DialoguePayload.CODEC);
+
         if (WHEEL_OF_WACKY_LOADED) {
             PayloadTypeRegistry.playS2C().register(UpdateWheelPayload.UPDATE_WHEEL_ID, UpdateWheelPayload.CODEC);
             WheelPrediction.register();
         }
+
+        if (HONQUE_LOADED) {
+            CrystalHonk.registerHonk();
+            HonkPrediction.register();
+        }
+
         ServerTickEvents.START_SERVER_TICK.register(server -> {
             Iterator<Map.Entry<UUID, Prediction>> iterator = PredictionData.getServerState(server).predictions.entrySet().iterator();
             while (iterator.hasNext()) {
@@ -146,7 +158,7 @@ public class CrystalFortunes implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("predictions")
                 .then(literal("info").executes(context -> {
                     if (context.getSource().getPlayer() != null) {
-                        Prediction prediction = PredictionData.hasPrediction(context.getSource().getPlayer());
+                        Prediction prediction = PredictionData.getPrediction(context.getSource().getPlayer());
                         if (prediction != null) {
                             context.getSource().sendFeedback(() -> Text.of(prediction.toString()), false);
                         }
@@ -154,8 +166,10 @@ public class CrystalFortunes implements ModInitializer {
                     return 1;
                 }).then(argument("player", EntityArgumentType.players()).executes(context -> {
                     EntityArgumentType.getPlayers(context, "player").forEach(player -> {
-                        Prediction prediction = PredictionData.hasPrediction(player);
-                        context.getSource().sendFeedback(() -> Text.of(prediction.toString()), false);
+                        Prediction prediction = PredictionData.getPrediction(player);
+                        if (prediction != null) {
+                            context.getSource().sendFeedback(() -> Text.of(prediction.toString()), false);
+                        }
                     });
                     return 1;
                 })))
@@ -197,10 +211,10 @@ public class CrystalFortunes implements ModInitializer {
                     if (type != null) {
                         EntityArgumentType.getPlayers(context, "player").forEach(player -> {
                             if (PredictionData.setPrediction(player, type) != null) {
-                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction.1", player.getPlayerListName()), false);
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction.1", player.getName()), false);
                             }
                             else {
-                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction_failed.1", player.getPlayerListName()), false);
+                                context.getSource().sendFeedback(() -> Text.translatable("commands.crystal_fortunes.set_prediction_failed.1", player.getName()), false);
                             }
                         });
                     }

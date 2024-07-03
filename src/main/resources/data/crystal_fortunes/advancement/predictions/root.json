@@ -28,7 +28,7 @@
     },
     "show_toast": true,
     "title": {
-      "translate": "advancements.crystal_fortunes.predictions.title"
+      "translate": "advancements.crystal_fortunes.predictions.root.title"
     }
   },
   "requirements": [

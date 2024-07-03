@@ -25,7 +25,6 @@ import java.util.UUID;
 
 public record EvilBeastPrediction(UUID player, UUID rabbit) implements Prediction {
 
-
     private final static int SPAWN_DISTANCE = 100;
 
     public static final MapCodec<EvilBeastPrediction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(

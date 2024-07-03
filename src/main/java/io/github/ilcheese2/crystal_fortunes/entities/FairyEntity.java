@@ -65,7 +65,7 @@ public class FairyEntity extends PassiveEntity {
         if (getWorld().isClient) {
             return ActionResult.SUCCESS;
         }
-        if (PredictionData.hasPrediction(player) == null) {
+        if (!PredictionData.hasPrediction(player)) {
             dialogueProgress.put(player.getUuid(), 0);
             ((ServerPlayerEntity) player).networkHandler.sendPacket(ServerPlayNetworking.createS2CPacket(new DialoguePayload("dialogue.crystal_fortunes.predictionless", true)));
             return ActionResult.SUCCESS;
