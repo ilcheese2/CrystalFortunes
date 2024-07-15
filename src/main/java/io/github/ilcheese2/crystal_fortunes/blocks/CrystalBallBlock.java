@@ -79,12 +79,10 @@ public class CrystalBallBlock extends HorizontalFacingBlock implements BlockEnti
         }
 
         if (prediction instanceof EvilBeastPrediction beastPrediction) {
-            ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, ((WorldInvoker) world).invokeGetEntityLookup().get(beastPrediction.rabbit()));
-        } else if (prediction instanceof LovePrediction lovePrediction) {
-            ServerPlayerEntity entity = (ServerPlayerEntity) ((WorldInvoker) world).invokeGetEntityLookup().get(lovePrediction.player());
-            if (entity != null && entity.getCameraEntity() == entity) {
-                ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, entity);
+            if ( ((WorldInvoker) world).invokeGetEntityLookup().get(beastPrediction.rabbit()) != null ) {
+                ServerCameraHandler.setCameraEntity((ServerPlayerEntity) player, ((WorldInvoker) world).invokeGetEntityLookup().get(beastPrediction.rabbit()));
             }
+        } else if (prediction instanceof LovePrediction lovePrediction) {
         }
 
 

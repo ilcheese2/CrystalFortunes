@@ -55,7 +55,11 @@ public class PredictionData extends PersistentState {
     }
 
     public static Prediction getPrediction(PlayerEntity player) {
-        PredictionData serverState = getServerState(Objects.requireNonNull(player.getWorld().getServer()));
+        MinecraftServer server = player.getWorld().getServer();
+        if (server == null) {
+            return null;
+        }
+        PredictionData serverState = getServerState(server);
         return serverState.predictions.getOrDefault(player.getUuid(), null);
     }
 

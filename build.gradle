@@ -20,6 +20,7 @@ repositories {
             includeGroupByRegex 'dev\\.onyxstudios.*'
         }
     }
+    maven { url 'https://maven.nucleoid.xyz' }
     exclusiveContent {
         forRepository {
             maven {
@@ -48,8 +49,9 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "org.ladysnake:satin:${satin_version}"
     include "org.ladysnake:satin:${satin_version}"
-    modCompileOnly("maven.modrinth:wheel-of-wacky:+")
-    modCompileOnly("maven.modrinth:honque:+")
+    modCompileOnly("maven.modrinth:JwRk761J:0.1.9")
+    modCompileOnly("maven.modrinth:xqSLPzRa:3.4")
+    modCompileOnly("eu.pb4:polymer-core:0.9.5+1.21")
 }
 
 processResources {

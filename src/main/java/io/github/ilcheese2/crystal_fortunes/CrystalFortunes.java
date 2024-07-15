@@ -141,10 +141,9 @@ public class CrystalFortunes implements ModInitializer {
             handler.sendPacket(ServerPlayNetworking.createS2CPacket(new PredictionPayload(Objects.requireNonNullElseGet(prediction, NullPrediction::new))));
         }));
         UseEntityCallback.EVENT.register((player1, world, hand, entity, hitResult) -> {
-            if (LovePrediction.lovers.containsKey(player1.getUuid()) && LovePrediction.lovers.get(player1.getUuid()) == entity.getUuid()) {
+            if (PredictionData.hasPrediction(player1) && PredictionData.getPrediction(player1) instanceof LovePrediction) {
                 if (player1.getStackInHand(hand).isIn(LovePrediction.ACCEPTABLE_GIFTS)) {
                     player1.getStackInHand(hand).decrement(1);
-                    LovePrediction.lovers.remove(player1.getUuid());
                     PredictionData.deletePrediction(player1.getUuid());
                     if (!player1.getInventory().contains(new ItemStack(RING, 1))) {
                         player1.giveItemStack(new ItemStack(RING, 1));
@@ -156,6 +155,12 @@ public class CrystalFortunes implements ModInitializer {
         });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("predictions")
+                .then(literal("exitspectator").executes(context -> {
+                    if (context.getSource().getPlayer() != null) {
+                        CameraData.fixPlayer(context.getSource().getPlayer());
+                    }
+                    return 1;
+                }))
                 .then(literal("info").executes(context -> {
                     if (context.getSource().getPlayer() != null) {
                         Prediction prediction = PredictionData.getPrediction(context.getSource().getPlayer());

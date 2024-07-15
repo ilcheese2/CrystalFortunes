@@ -18,8 +18,6 @@ import java.util.UUID;
 
 public record LovePrediction(UUID player, UUID lover) implements Prediction {
 
-    public static final Map<UUID,UUID> lovers = new HashMap<>();
-
     public static final TagKey<Item> ACCEPTABLE_GIFTS = ItemTags.FLOWERS;
 
     public static final MapCodec<LovePrediction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -54,7 +52,6 @@ public record LovePrediction(UUID player, UUID lover) implements Prediction {
             }
         }
         ServerPlayerEntity serverPlayerEntity = playerList.get(i);
-        lovers.put(playerEntity.getUuid(), serverPlayerEntity.getUuid());
         return new LovePrediction(playerEntity.getUuid(), serverPlayerEntity.getUuid());
     }
 

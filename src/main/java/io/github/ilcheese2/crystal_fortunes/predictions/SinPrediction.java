@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.ilcheese2.crystal_fortunes.CrystalFortunes;
 import io.github.ilcheese2.crystal_fortunes.entities.SinEntity;
 import io.github.ilcheese2.crystal_fortunes.mixin.StatTypeAccessor;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -56,6 +57,11 @@ public record SinPrediction(UUID player, UUID sin) implements Prediction {
         if (statHandler.getStat(stat) == 0) {
             return null;
         }
+
+        if (FabricLoader.getInstance().isModLoaded("polymer") && PolymerCompat.checkPolymer((EntityType<?>) stat.getValue(), playerEntity.getWorld())) {
+            return null;
+        }
+
         ServerWorld world = ((ServerPlayerEntity) playerEntity).getServerWorld();
         SinEntity entity = new SinEntity(world, (EntityType) stat.getValue(), playerEntity);
         entity.initialize(world, world.getLocalDifficulty(pos), SpawnReason.EVENT, null);
