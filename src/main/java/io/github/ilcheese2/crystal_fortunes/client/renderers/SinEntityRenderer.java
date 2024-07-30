@@ -7,6 +7,7 @@ import io.github.ilcheese2.crystal_fortunes.mixin.LivingEntityRendererInvoker;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.MobEntityRenderer;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 
 @SuppressWarnings({"rawtypes", "unchecked"}) // fuck generics
 public class SinEntityRenderer extends MobEntityRenderer {
-    record EntityRenderData <T extends LivingEntity> (SinEntityModel<T> model, LivingEntityRenderer<T, ?> renderer, T entity) {}
+    record EntityRenderData <T extends LivingEntity> (SinEntityModel<T> model, @Nullable LivingEntityRenderer<T, ?> renderer, @Nullable T entity) {}
     EntityRendererFactory.Context ctx;
     static final HashMap<EntityType, EntityRenderData> renderDatas = new HashMap<>();
 
@@ -40,7 +41,7 @@ public class SinEntityRenderer extends MobEntityRenderer {
 
     @Override
     public Identifier getTexture(Entity entity) {
-        if (((SinEntity) entity).appearanceType == null) {
+        if (((SinEntity) entity).appearanceType == null || getRenderData(((SinEntity)entity).appearanceType).renderer() == null) {
             return Identifier.ofVanilla("textures/entity/cow/cow.png");
         }
         return getRenderData(((SinEntity)entity).appearanceType).renderer().getTexture(getRenderData(((SinEntity)entity).appearanceType).entity);
@@ -49,7 +50,7 @@ public class SinEntityRenderer extends MobEntityRenderer {
 
     @Override
     protected int getBlockLight(Entity entity, BlockPos pos) {
-        if (((SinEntity) entity).appearanceType == null) {
+        if (((SinEntity) entity).appearanceType == null || getRenderData(((SinEntity)entity).appearanceType).renderer() == null) {
             return 0;
         }
         return ((EntityRendererInvoker) getRenderData(((SinEntity) entity).appearanceType).renderer).invokeGetBlockLight(getRenderData(((SinEntity) entity).appearanceType).entity, pos);
@@ -58,7 +59,13 @@ public class SinEntityRenderer extends MobEntityRenderer {
     private <T extends LivingEntity> EntityRenderData<T> getRenderData(EntityType<T> type) {
         return renderDatas.computeIfAbsent(type, (t) -> {
             T entity = (T) t.create(MinecraftClient.getInstance().world);
-            var renderer1 = ctx.getRenderDispatcher().getRenderer(entity);
+            if (entity == null) {
+                entity = (T) EntityType.VEX.create(MinecraftClient.getInstance().world);
+            }
+            EntityRenderer renderer1 = null;
+            if (entity != null) {
+                renderer1 = ctx.getRenderDispatcher().getRenderer(entity);
+            }
             return new EntityRenderData<>(new SinEntityModel<T>((LivingEntityRenderer<T, EntityModel<T>>) renderer1, t, entity), (LivingEntityRenderer<T, EntityModel<T>>) renderer1, entity);
         });
     }
@@ -81,7 +88,7 @@ public class SinEntityRenderer extends MobEntityRenderer {
 
     @Override
     protected float getAnimationProgress(LivingEntity entity, float tickDelta) {
-        if (((SinEntity) entity).appearanceType == null) {
+        if (((SinEntity) entity).appearanceType == null || getRenderData(((SinEntity)entity).appearanceType).renderer() == null) {
             return 0.0f;
         }
         return ((LivingEntityRendererInvoker) getRenderData(((SinEntity) entity).appearanceType).renderer).invokeGetAnimationProgress(getRenderData(((SinEntity) entity).appearanceType).entity, tickDelta);

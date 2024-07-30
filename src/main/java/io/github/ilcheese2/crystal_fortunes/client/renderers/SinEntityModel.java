@@ -7,6 +7,7 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 
 public class SinEntityModel<T extends LivingEntity> extends EntityModel<SinEntity<T>> {
 
@@ -14,7 +15,7 @@ public class SinEntityModel<T extends LivingEntity> extends EntityModel<SinEntit
     EntityType<T> type;
     EntityModel<T> model;
 
-    public SinEntityModel(LivingEntityRenderer<T, EntityModel<T>> renderer, EntityType<T> type, T entity) {
+    public SinEntityModel(@Nullable LivingEntityRenderer<T, EntityModel<T>>  renderer, EntityType<T> type, @Nullable  T entity) {
         if (renderer == null) {
             model = null;
         }
@@ -27,7 +28,9 @@ public class SinEntityModel<T extends LivingEntity> extends EntityModel<SinEntit
 
     @Override
     public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
-        model.render(matrices, vertices, light, overlay, color);
+        if (model != null) {
+            model.render(matrices, vertices, light, overlay, color);
+        }
     }
 
     @Override
@@ -40,7 +43,6 @@ public class SinEntityModel<T extends LivingEntity> extends EntityModel<SinEntit
 
     @Override
     public void setAngles(SinEntity entity2, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
-
         if (entity == null) {
             return;
         }
